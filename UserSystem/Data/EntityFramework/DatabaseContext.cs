@@ -2,7 +2,7 @@
 using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
 
-namespace ChatServer.UserSystem.Data
+namespace ChatServer.UserSystem.Data.EntityFramework
 {
     internal class ChatDataContext : DbContext
     {

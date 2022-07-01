@@ -1,4 +1,7 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using ChatServer.UserSystem.Data.Abstract;
+using ChatServer.UserSystem.Data.EntityFramework;
+
+using Microsoft.EntityFrameworkCore;
 
 namespace ChatServer.UserSystem.Data
 {
@@ -8,7 +11,7 @@ namespace ChatServer.UserSystem.Data
 
         public static SqlDataSource Initialize()
         {
-            using var context = new ChatDataContext();
+            var context = new ChatDataContext();
             context.Database.EnsureCreated();
             context.Database.Migrate();
             return new SqlDataSource();
@@ -16,7 +19,7 @@ namespace ChatServer.UserSystem.Data
 
         void IAuthenticationDataSource.AddRow(string deviceId, string userName, string color)
         {
-            using var context = new ChatDataContext();
+            var context = new ChatDataContext();
             var user = new UserModel()
             {
                 DeviceId = deviceId,
@@ -29,8 +32,10 @@ namespace ChatServer.UserSystem.Data
 
         public UserModel GetRowWithDeviceId(string deviceId)
         {
-            using var context = new ChatDataContext();
-            var query = from user in context.Users where user.DeviceId == deviceId select user;
+            var context = new ChatDataContext();
+            var query = from user in context.Users 
+                        where user.DeviceId == deviceId 
+                        select user;
             ThrowIfEmpty(query);
             return query.First();
         }
@@ -50,7 +55,7 @@ namespace ChatServer.UserSystem.Data
 
         void IUserDataSource.SendMessage(string messageText, int senderId)
         {
-            using var query = new ChatDataContext();
+            var query = new ChatDataContext();
             var senderUser = query.Users.Where(x => x.Id == senderId).First();
             var message = new MessageModel()
             {
@@ -64,20 +69,40 @@ namespace ChatServer.UserSystem.Data
 
         private IQueryable<UserModel> GetUsersByDeviceId(string deviceId)
         {
-            using var context = new ChatDataContext();
+            var context = new ChatDataContext();
             return from user in context.Users where user.DeviceId == deviceId select user;
         }
 
         private void ThrowIfEmpty<T>(IQueryable<T> values)
         {
             if (values.Any() == false)
-                throw new InvalidOperationException("No records with such device id found");
+                throw new InvalidOperationException("No records found");
         }
 
-        public UserDto[] GetAllUsers()
+        public UserModel[] GetAllUsers()
         {
-            using var query = new ChatDataContext();
-            return query.Users.Select(x => new UserDto(x)).ToArray();
+            var query = new ChatDataContext();
+            return query.Users.ToArray();
+        }
+
+        public MessageModel[] GetLastMessages(int amount)
+        {
+            var query = new ChatDataContext();
+            return query.Messages.Take(amount).OrderByDescending(x => x.Time).ToArray();
+        }
+
+        public void MakeOffline(int id)
+        {
+            var query = new ChatDataContext();
+            query.Users.Where(x => x.Id == id).First().IsOnline = false;
+            query.SaveChanges();
+        }
+
+        public void MakeOnline(int id)
+        {
+            var query = new ChatDataContext();
+            query.Users.Where(x => x.Id == id).First().IsOnline = true;
+            query.SaveChanges();
         }
     }
 }

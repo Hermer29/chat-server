@@ -1,10 +1,14 @@
-﻿namespace ChatServer
+﻿using ChatServer.UserSystem;
+
+namespace ChatServer
 {
     internal class Program
     {
         static void Main(string[] args)
         {
-            Console.WriteLine("Hello, World!");
+            var userSystem = new UserSystemCompositeRoot();
+            userSystem.Initialize();
+            Console.ReadLine();
         }
     }
 }

@@ -1,4 +1,6 @@
-﻿namespace ChatServer.UserSystem.Data
+﻿using ChatServer.UserSystem.Data.EntityFramework;
+
+namespace ChatServer.UserSystem.Data.Abstract
 {
     internal interface IAuthenticationDataSource
     {

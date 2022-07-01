@@ -1,6 +1,7 @@
-﻿using ChatServer.UserSystem.Data;
+﻿using ChatServer.UserSystem.Data.Abstract;
+using ChatServer.UserSystem.Data.EntityFramework;
 
-namespace ChatServer.UserSystem
+namespace ChatServer.UserSystem.DomainModel
 {
     public class User
     {
@@ -18,12 +19,16 @@ namespace ChatServer.UserSystem
 
         internal User(UserModel user, IUserDataSource dataSource) : this(user.Id, user.UserName, user.Color, dataSource) { }
 
+        public event Action NewMessageReceived;
+
         public int Id { get; }
         public string UserName { get; }
         public string Color { get; }
 
-        public void SendMessage(string message)
+        public void SaveMessage(string message)
         {
+            if (string.IsNullOrEmpty(message))
+                throw new ArgumentNullException(nameof(message));
             _dataSource.SendMessage(message, Id);
         }
     }
